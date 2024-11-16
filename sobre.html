@@ -11,6 +11,7 @@
             padding: 0;
             background-color: #f8f9fa;
             color: #343a40;
+            line-height: 1.6;
         }
         header {
             background-color: #343a40;
@@ -18,27 +19,53 @@
             padding: 20px;
             text-align: center;
         }
+        header h1 {
+            margin: 0;
+        }
+        nav {
+            background-color: #25D366;
+            text-align: center;
+            padding: 10px 0;
+        }
+        nav a {
+            text-decoration: none;
+            color: #ffffff;
+            margin: 0 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
         main {
             padding: 20px;
+        }
+        main h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #343a40;
+        }
+        main p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+        main ul {
+            list-style-type: disc;
+            margin: 20px auto;
+            padding: 0;
+            max-width: 800px;
+            text-align: left;
+        }
+        main ul li {
+            margin: 10px 0;
+            font-size: 1.1em;
         }
         footer {
             background-color: #343a40;
             color: #ffffff;
             text-align: center;
             padding: 10px;
-        }
-        nav {
-            text-align: center;
-            margin: 10px 0;
-        }
-        nav a {
-            text-decoration: none;
-            color: #25D366;
-            margin: 0 15px;
-            font-size: 1.2em;
-        }
-        nav a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
@@ -54,14 +81,28 @@
     </nav>
     <main>
         <h2>Sobre Nós</h2>
-        <p>Na Coutrin Figueiredo Advogados Associados, nossa missão é fornecer serviços jurídicos de alta qualidade, com foco em ética, transparência e resultados. Somos especializados em:</p>
+        <p>
+            Na Coutrin Figueiredo Advogados Associados, nossa missão é fornecer serviços jurídicos de alta qualidade,
+            com foco em ética, transparência e resultados. Com uma equipe altamente qualificada, nos dedicamos a
+            criar soluções personalizadas que atendam às necessidades específicas de cada cliente.
+        </p>
+        <h3>Nossos Valores</h3>
+        <ul>
+            <li><strong>Ética:</strong> Agimos com integridade e respeito em todas as nossas relações.</li>
+            <li><strong>Excelência:</strong> Buscamos sempre superar as expectativas de nossos clientes.</li>
+            <li><strong>Compromisso:</strong> Priorizamos as necessidades e interesses de nossos clientes.</li>
+        </ul>
+        <h3>Nossas Especialidades</h3>
         <ul>
             <li>Direito Eleitoral</li>
             <li>Consultoria Estratégica Jurídica</li>
             <li>Defesas e Recursos Eleitorais</li>
             <li>Direito Administrativo e Público</li>
         </ul>
-        <p>Com uma equipe altamente qualificada, estamos comprometidos em oferecer soluções jurídicas personalizadas que atendam às necessidades específicas de cada cliente.</p>
+        <p>
+            Entre em contato conosco para saber mais sobre como podemos ajudar você ou sua empresa a alcançar seus
+            objetivos jurídicos.
+        </p>
     </main>
     <footer>
         <p>&copy; 2024 Coutrin Figueiredo Advogados Associados</p>
