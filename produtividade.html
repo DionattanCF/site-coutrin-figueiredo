@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtividade - Coutrin Figueiredo Advogados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #343a40;
+            text-align: center;
+        }
+        header {
+            background-color: #343a40;
+            color: #ffffff;
+            padding: 20px;
+        }
+        main {
+            display: none;
+            padding: 20px;
+        }
+        footer {
+            background-color: #343a40;
+            color: #ffffff;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        button {
+            background-color: #25D366;
+            color: #ffffff;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #1db954;
+        }
+        .login-box {
+            margin-top: 50px;
+        }
+        input[type="password"] {
+            padding: 10px;
+            font-size: 1em;
+            margin: 10px 0;
+            width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Produtividade - Coutrin Figueiredo Advogados</h1>
+    </header>
+    <div class="login-box">
+        <p>Digite a senha para acessar:</p>
+        <input type="password" id="password" placeholder="Senha">
+        <button onclick="validatePassword()">Entrar</button>
+    </div>
+    <main id="content">
+        <h2>Links de Produtividade</h2>
+        <p>Clique nos botões abaixo para acessar as ferramentas:</p>
+        <button onclick="window.open('https://chat.openai.com/', '_blank')">ChatGPT</button>
+        <button onclick="window.open('https://www.napkin.ai/', '_blank')">Napkin</button>
+        <button onclick="window.open('https://pje1g-go.tse.jus.br/pje/login.seam?loginComCertificado=false', '_blank')">PJE - TRE-GO (1ª Instância)</button>
+        <button onclick="window.open('https://pje.tre-go.jus.br/pje/login.seam', '_blank')">TRE-GO</button>
+        <button onclick="window.open('https://pje.tse.jus.br/pje/login.seam', '_blank')">TSE</button>
+        <button onclick="window.open('https://mural-consulta.tse.jus.br/mural/dashboard', '_blank')">Mural de Decisões</button>
+        <button onclick="window.open('https://apps.tre-go.jus.br/placar', '_blank')">Placar TRE-GO</button>
+        <button onclick="window.open('https://login.microsoftonline.com/27eae270-6558-4333-af67-aee146db178f/oauth2/authorize?...', '_blank')">Meu Escritório</button>
+        <button onclick="window.open('https://julgados.com.br', '_blank')">Jurisprudências</button>
+        <button onclick="window.open('https://www.tse.jus.br/hotsites/consultas-jurisprudencia/jurisprudencia.html', '_blank')">Jurisprudências TSE</button>
+    </main>
+    <footer>
+        <p>&copy; 2024 Coutrin Figueiredo Advogados Associados</p>
+    </footer>
+
+    <script>
+        function validatePassword() {
+            const password = document.getElementById('password').value;
+            if (password === '1010') {
+                document.querySelector('.login-box').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            } else {
+                alert('Senha incorreta. Tente novamente.');
+            }
+        }
+    </script>
+</body>
+</html>
