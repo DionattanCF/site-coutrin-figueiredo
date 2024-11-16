@@ -55,6 +55,19 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
+        .iframe-container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .iframe-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #343a40;
+        }
+        iframe {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -81,6 +94,11 @@
         <button onclick="window.open('https://www.tse.jus.br/hotsites/consultas-jurisprudencia/jurisprudencia.html', '_blank')">Jurisprudências TSE</button>
         <button onclick="window.open('https://forms.office.com/r/T8mrn7jWs5', '_blank')">Criar Procurações</button>
         <button onclick="window.open('https://app.powerbi.com/home?tenant=27eae270-6558-4333-af67-aee146db178f&experience=power-bi', '_blank')">PowerBI</button>
+        
+        <div class="iframe-container">
+            <h3 class="iframe-title">Controle de Processos</h3>
+            <iframe title="Painel_Processos" width="1140" height="541.25" src="https://app.powerbi.com/reportEmbed?reportId=2847170e-de6a-4334-8364-41a258d6479a&autoAuth=true&ctid=27eae270-6558-4333-af67-aee146db178f" frameborder="0" allowFullScreen="true"></iframe>
+        </div>
     </main>
     <footer>
         <p>&copy; 2024 Coutrin Figueiredo Advogados Associados</p>
