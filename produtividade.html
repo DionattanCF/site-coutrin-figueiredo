@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
     <title>Produtividade - Coutrin Figueiredo Advogados</title>
 
     <!-- Fonte Google -->
@@ -231,24 +230,12 @@
     </footer>
 
     <script>
-        // Hash da senha "1010" em SHA-256 (Exemplo)
-        // Gerado externamente, ex: usando CryptoJS
-        // Isso ainda não é segurança real, apenas ofuscação.
-        const validPasswordHash = "f4ab63aaccc186488259dcc50a7270e269de40cfa116eaa2da274df90b76d051";
+        // Agora usamos uma senha simples sem hashing
+        const simplePassword = "1010";
 
-        async function hashMessage(message) {
-            const msgUint8 = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            return hashHex;
-        }
-
-        async function validatePassword() {
+        function validatePassword() {
             const password = document.getElementById('password').value.trim();
-            const enteredHash = await hashMessage(password);
-
-            if (enteredHash === validPasswordHash) {
+            if (password === simplePassword) {
                 document.querySelector('.login-box').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
             } else {
