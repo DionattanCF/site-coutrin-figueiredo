@@ -245,7 +245,7 @@
         }
 
         async function validatePassword() {
-            const password = document.getElementById('password').value;
+            const password = document.getElementById('password').value.trim();
             const enteredHash = await hashMessage(password);
 
             if (enteredHash === validPasswordHash) {
