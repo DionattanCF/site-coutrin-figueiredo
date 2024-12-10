@@ -6,46 +6,47 @@
     <title>Produtividade - Coutrin Figueiredo Advogados</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f8f9fa;
-            color: #343a40;
-            text-align: center;
+            background-color: #f1f1f1;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         header {
-            background-color: #343a40;
-            color: #ffffff;
+            background-color: #222;
+            color: #fff;
             padding: 20px;
+            text-align: center;
         }
         main {
-            display: none;
+            max-width: 800px;
+            margin: 20px auto;
             padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none;
         }
         footer {
-            background-color: #343a40;
-            color: #ffffff;
+            background-color: #222;
+            color: #fff;
             text-align: center;
             padding: 10px;
             position: fixed;
             bottom: 0;
             width: 100%;
         }
-        button {
-            background-color: #25D366;
-            color: #ffffff;
-            padding: 10px 20px;
-            margin: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        button:hover {
-            background-color: #1db954;
-        }
         .login-box {
-            margin-top: 50px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         input[type="password"] {
             padding: 10px;
@@ -55,18 +56,42 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        .iframe-container {
-            margin-top: 50px;
-            text-align: center;
-        }
-        .iframe-title {
-            font-size: 1.8em;
-            margin-bottom: 20px;
-            color: #343a40;
-        }
-        iframe {
-            border: 1px solid #ccc;
+        button {
+            background-image: linear-gradient(to right, #25D366, #1db954);
+            color: #ffffff;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
             border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        button:hover {
+            background-image: linear-gradient(to right, #1db954, #25D366);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        }
+        main h2, main p {
+            text-align: left;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .iframe-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            margin-top: 50px;
+        }
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
         }
     </style>
 </head>
@@ -82,24 +107,25 @@
     <main id="content">
         <h2>Links de Produtividade</h2>
         <p>Clique nos botões abaixo para acessar as ferramentas:</p>
-        <button onclick="window.open('https://chat.openai.com/', '_blank')">ChatGPT</button>
-        <button onclick="window.open('https://www.napkin.ai/', '_blank')">Napkin</button>
-        <button onclick="window.open('https://pje1g-go.tse.jus.br/pje/login.seam?loginComCertificado=false', '_blank')">PJE - TRE-GO (1ª Instância)</button>
-        <button onclick="window.open('https://pje.tre-go.jus.br/pje/login.seam', '_blank')">TRE-GO (Tribunal)</button>
-        <button onclick="window.open('https://pje.tse.jus.br/pje/login.seam', '_blank')">TSE</button>
-        <button onclick="window.open('https://mural-consulta.tse.jus.br/mural/dashboard', '_blank')">Mural de Decisões</button>
-        <button onclick="window.open('https://apps.tre-go.jus.br/placar', '_blank')">Placar TRE-GO</button>
-        <button onclick="window.open('https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=4765445b-32c6-49b0-83e6-1d93765276ca&redirect_uri=https%3A%2F%2Fwww.office.com%2Flandingv2&response_type=code%20id_token&scope=openid%20profile%20https%3A%2F%2Fwww.office.com%2Fv2%2FOfficeHome.All&response_mode=form_post&nonce=638673639113825625.Yjg4OGVhYjUtMDc5ZC00YWJlLTk3OGYtZWIxMjE5YzlkZWI5MGU2YWY1YTktMDRhZS00Y2JhLWE4YmYtNjQ0MTI4M2M3OTA3&ui_locales=en-US&mkt=en-US&client-request-id=d06c8859-a851-43da-9814-7fdd7d488c25&state=Hfxc6YLc61hurn-YAJXc-o_0QNuF1JRqKD3inDCMqsHWQ_2PXnARhRNq9mFAkjaYUTVPAONWFFwMoPgolMeEhjTNL5NW9vN_qY-Qsu1Hvn5bQbQfHPF-DL2WDoRUXGRRDwBJWwvjZGdHzY3Xm_he3YP2eoA8li6alXhwuMOKWmsw4HwoQ6kwxsyBmDzUIl6L8WpjfgAC5hXY1fyrfGOxnqK_Uf2hn6uAx1ZzxaPF1unXVsmoWfLGw8aH0NJFuLAU_VMGT5jYm8fqvEIwyKYThU0v7nEBBv6GsFHRIyEFe0A&x-client-SKU=ID_NET8_0&x-client-ver=7.5.1.0.', '_blank')">Meu Escritório</button>
-        <button onclick="window.open('https://julgados.com.br', '_blank')">Jurisprudências</button>
-        <button onclick="window.open('https://www.tse.jus.br/hotsites/consultas-jurisprudencia/jurisprudencia.html', '_blank')">Jurisprudências TSE</button>
-        <button onclick="window.open('https://forms.office.com/r/T8mrn7jWs5', '_blank')">Criar Procurações</button>
-        <button onclick="window.open('https://app.powerbi.com/home?tenant=27eae270-6558-4333-af67-aee146db178f&experience=power-bi', '_blank')">PowerBI</button>
-        <button onclick="window.open('https://forms.office.com/r/6Wb1tPPUPz', '_blank')">Contrato Elegis</button>
-        <button onclick="window.open('https://notebooklm.google/', '_blank')">Notbook LM (Gemini)</button>
-        
+        <div class="button-grid">
+            <button onclick="window.open('https://chat.openai.com/', '_blank')">ChatGPT</button>
+            <button onclick="window.open('https://www.napkin.ai/', '_blank')">Napkin</button>
+            <button onclick="window.open('https://pje1g-go.tse.jus.br/pje/login.seam?loginComCertificado=false', '_blank')">PJE - TRE-GO (1ª Instância)</button>
+            <button onclick="window.open('https://pje.tre-go.jus.br/pje/login.seam', '_blank')">TRE-GO (Tribunal)</button>
+            <button onclick="window.open('https://pje.tse.jus.br/pje/login.seam', '_blank')">TSE</button>
+            <button onclick="window.open('https://mural-consulta.tse.jus.br/mural/dashboard', '_blank')">Mural de Decisões</button>
+            <button onclick="window.open('https://apps.tre-go.jus.br/placar', '_blank')">Placar TRE-GO</button>
+            <button onclick="window.open('https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=4765445b-32c6-49b0-83e6-1d93765276ca&redirect_uri=https%3A%2F%2Fwww.office.com%2Flandingv2&response_type=code%20id_token&scope=openid%20profile%20https%3A%2F%2Fwww.office.com%2Fv2%2FOfficeHome.All&response_mode=form_post&nonce=638673639113825625.Yjg4OGVhYjUtMDc5ZC00YWJlLTk3OGYtZWIxMjE5YzlkZWI5MGU2YWY1YTktMDRhZS00Y2JhLWE4YmYtNjQ0MTI4M2M3OTA3&ui_locales=en-US&mkt=en-US&client-request-id=d06c8859-a851-43da-9814-7fdd7d488c25&state=Hfxc6YLc61hurn-YAJXc-o_0QNuF1JRqKD3inDCMqsHWQ_2PXnARhRNq9mFAkjaYUTVPAONWFFwMoPgolMeEhjTNL5NW9vN_qY-Qsu1Hvn5bQbQfHPF-DL2WDoRUXGRRDwBJWwvjZGdHzY3Xm_he3YP2eoA8li6alXhwuMOKWmsw4HwoQ6kwxsyBmDzUIl6L8WpjfgAC5hXY1fyrfGOxnqK_Uf2hn6uAx1ZzxaPF1unXVsmoWfLGw8aH0NJFuLAU_VMGT5jYm8fqvEIwyKYThU0v7nEBBv6GsFHRIyEFe0A&x-client-SKU=ID_NET8_0&x-client-ver=7.5.1.0.', '_blank')">Meu Escritório</button>
+            <button onclick="window.open('https://julgados.com.br', '_blank')">Jurisprudências</button>
+            <button onclick="window.open('https://www.tse.jus.br/hotsites/consultas-jurisprudencia/jurisprudencia.html', '_blank')">Jurisprudências TSE</button>
+            <button onclick="window.open('https://forms.office.com/r/T8mrn7jWs5', '_blank')">Criar Procurações</button>
+            <button onclick="window.open('https://app.powerbi.com/home?tenant=27eae270-6558-4333-af67-aee146db178f&experience=power-bi', '_blank')">PowerBI</button>
+            <button onclick="window.open('https://forms.office.com/r/6Wb1tPPUPz', '_blank')">Contrato Elegis</button>
+            <button onclick="window.open('https://notebooklm.google.com/', '_blank')">Notebook LM (Gemini)</button>
+        </div>
         <div class="iframe-container">
             <h3 class="iframe-title">Controle de Processos</h3>
-           <iframe title="Painel_Processos" width="1960" height="1080" src="https://app.powerbi.com/reportEmbed?reportId=2847170e-de6a-4334-8364-41a258d6479a&autoAuth=true&ctid=27eae270-6558-4333-af67-aee146db178f" frameborder="0" allowFullScreen="true"></iframe>
+            <iframe title="Painel_Processos" src="https://app.powerbi.com/reportEmbed?reportId=2847170e-de6a-4334-8364-41a258d6479a&autoAuth=true&ctid=27eae270-6558-4333-af67-aee146db178f"></iframe>
         </div>
     </main>
     <footer>
