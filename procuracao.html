@@ -1072,58 +1072,77 @@
             $('#procuracaoForm').submit(async function(e) {
                 e.preventDefault();
                 
+                // Verificar se o consentimento foi dado
+                if (!$('#consentimento').is(':checked')) {
+                    alert('É necessário concordar com o uso dos dados para prosseguir.');
+                    return;
+                }
+                
                 const submitButton = $('#submitButton');
                 submitButton.prop('disabled', true).addClass('loading');
                 
                 try {
-                    const formData = new FormData(this);
+                    // Criar um objeto FormData fresco
+                    const formData = new FormData();
                     
-                    // Adiciona os arquivos ao FormData
+                    // Adicionar todos os campos do formulário
+                    const formEl = this;
+                    $('input, select, textarea', formEl).each(function() {
+                        const input = $(this);
+                        const name = input.attr('name');
+
+                        // Pular inputs de arquivo (tratados separadamente) e campos sem nome
+                        if (!name || input.attr('type') === 'file') return;
+                        
+                        // Para checkbox, verificar se está marcado
+                        if (input.attr('type') === 'checkbox') {
+                            if (input.is(':checked')) {
+                                formData.append(name, 'on');
+                            }
+                            return;
+                        }
+                        
+                        // Para todos os outros campos
+                        formData.append(name, input.val() || '');
+                    });
+                    
+                    // Adicionar os arquivos
                     $('.file-upload input[type="file"]').each(function() {
                         const docType = $(this).closest('.file-upload').data('doc');
                         const files = this.files;
+                        
                         for (let i = 0; i < files.length; i++) {
+                            // Usar nome sem colchetes para evitar problemas
                             formData.append(`file_${docType}_${i}`, files[i]);
                         }
                     });
                     
+                    // Adicionar timestamp
                     formData.append('timestamp', new Date().toISOString());
                     
-                    // Para envio usando JSON, precisamos converter FormData para objeto
+                    // Criar objeto JSON para envio ao banco D1
                     const jsonData = {};
+                    
+                    // Usar forma mais segura de extrair dados do FormData
                     for (const [key, value] of formData.entries()) {
-                        // Ignora arquivos para a versão JSON
+                        // Ignorar arquivos para versão JSON
                         if (!key.startsWith('file_')) {
                             jsonData[key] = value;
                         }
                     }
                     
-                    // URL do Worker do Cloudflare (após implantação)
-                    const workerUrl = 'https://formulario-procuracao-worker.seu-dominio.workers.dev';
+                    // URL do Worker do Cloudflare
+                    const workerUrl = 'https://flow.elegis.com.br/webhook-test/9f9f8057-0c33-4008-90eb-4dcd8e83464c';
                     
-                    // Para o banco D1, enviamos apenas os dados JSON (sem arquivos)
-                    const responseD1 = await fetch(workerUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(jsonData)
-                    });
-                    
-                    const resultD1 = await responseD1.json();
-                    
-                    if (!responseD1.ok || !resultD1.success) {
-                        throw new Error(resultD1.error || 'Erro ao salvar dados no banco');
-                    }
-                    
-                    // Para o webhook, enviamos o FormData completo com arquivos
-                    const webhookUrl = 'https://flow.elegis.com.br/webhook-test/9f9f8057-0c33-4008-90eb-4dcd8e83464c';
-                    
-                    // Se o webhook aceitar FormData com arquivos:
-                    await fetch(webhookUrl, {
+                    // Enviar somente para o webhook por enquanto (até implementar o worker)
+                    const response = await fetch(workerUrl, {
                         method: 'POST',
                         body: formData
                     });
+                    
+                    if (!response.ok) {
+                        throw new Error('Erro ao enviar formulário');
+                    }
                     
                     alert('Formulário enviado com sucesso!');
                     
@@ -1168,17 +1187,31 @@
                 prevStep(4);
             });
             
-            $('#showSubmitBtn').click(function() {
+            $('#showSubmitBtn').click(function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Mostrar o botão de envio
                 $('#submitButton').removeClass('hidden');
                 $(this).addClass('hidden');
+                
+                // Opcionalmente, rolar até o botão para garantir que esteja visível
+                $('html, body').animate({
+                    scrollTop: $('#submitButton').offset().top - 100
+                }, 300);
             });
 
             // Controle de arquivos
-            $('.file-upload').click(function() {
+            $('.file-upload').click(function(e) {
+                // Evitar propagação do evento para prevenir ciclo infinito
+                e.stopPropagation();
                 $(this).find('input[type="file"]').click();
             });
 
-            $('.file-upload input[type="file"]').change(function() {
+            $('.file-upload input[type="file"]').change(function(e) {
+                // Evitar propagação do evento para prevenir ciclo infinito
+                e.stopPropagation();
+                
                 const fileList = $(this).closest('.form-group').find('.file-list');
                 const files = this.files;
                 
@@ -1194,7 +1227,10 @@
                 }
             });
 
-            $(document).on('click', '.remove-file', function() {
+            $(document).on('click', '.remove-file', function(e) {
+                // Evitar propagação do evento para prevenir ciclo infinito
+                e.stopPropagation();
+                
                 const fileList = $(this).closest('.file-list');
                 const fileUpload = fileList.closest('.form-group').find('.file-upload input[type="file"]');
                 
