@@ -1219,39 +1219,94 @@
                 }, 15000); // 15 segundos de timeout
                 
                 try {
-                    console.log('Tentando abrir ReceitaWS em nova aba');
-                    // Abordagem direta que não depende de JSONP e não é bloqueada por CORS
-                    // Usamos consulta direta ao navegador de dados públicos da ReceitaWS
-                    const receitaUrl = `https://www.receitaws.com.br/v1/cnpj/${cnpj}/days/20`;
-                    console.log('URL ReceitaWS:', receitaUrl);
+                    // Tenta primeiro consultar a API Gov.br
+                    console.log('Tentando consultar API Gov.br');
                     
-                    // Verificar se a abertura da nova janela foi bloqueada
-                    const newWindow = window.open(receitaUrl, '_blank');
-                    console.log('Nova janela aberta:', !!newWindow);
+                    // URL da API do Gov.br para consulta de CNPJ
+                    const apiUrl = `https://h-apigateway.conectagov.estaleiro.serpro.gov.br/api-cnpj-empresa/v2/empresa/${cnpj}`;
+                    console.log('URL API Gov.br:', apiUrl);
                     
-                    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-                        console.warn('Abertura de nova janela foi bloqueada pelo navegador - pop-up blocker ativo');
-                        alert('A consulta de CNPJ tenta abrir uma nova aba, mas parece que foi bloqueada pelo navegador. Por favor, permita pop-ups para este site ou preencha os dados manualmente.');
-                    } else {
-                        console.log('Nova janela aberta com sucesso');
-                        // Mensagem para o usuário
-                        alert('Uma janela foi aberta com os dados do CNPJ. Por favor, copie os dados necessários de lá para este formulário.');
-                    }
+                    // Tentar fazer a requisição à API
+                    fetch(apiUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            // Observe que a API Gov.br geralmente exige autenticação
+                            // 'Authorization': 'Bearer SEU_TOKEN_AQUI'
+                        }
+                    })
+                    .then(response => {
+                        console.log('Resposta da API recebida, status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`Erro na consulta: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Dados recebidos com sucesso:', data);
+                        // Preencher os campos com os dados da API
+                        document.getElementById('razaoSocial').value = data.nomeEmpresarial || '';
+                        document.getElementById('nomeFantasia').value = data.nomeFantasia || '';
+                        
+                        const endereco = data.endereco || {};
+                        document.getElementById('logradouroEmpresa').value = 
+                            (endereco.tipoLogradouro ? endereco.tipoLogradouro + ' ' : '') + 
+                            (endereco.logradouro || '');
+                        document.getElementById('numeroEmpresa').value = endereco.numero || '';
+                        document.getElementById('complementoEmpresa').value = endereco.complemento || '';
+                        document.getElementById('bairroEmpresa').value = endereco.bairro || '';
+                        document.getElementById('cidadeEmpresa').value = endereco.municipio?.descricao || '';
+                        document.getElementById('estadoEmpresa').value = endereco.municipio?.uf || '';
+                        document.getElementById('cepEmpresa').value = endereco.cep || '';
+                        
+                        // Restaurar botão
+                        consultarButton.disabled = false;
+                        consultarButton.textContent = 'Consultar CNPJ';
+                        clearTimeout(timeoutId);
+                        
+                        // Tornar os campos editáveis
+                        document.querySelectorAll('#razaoSocial, #nomeFantasia, #logradouroEmpresa, #numeroEmpresa, #complementoEmpresa, #bairroEmpresa, #cidadeEmpresa, #estadoEmpresa, #cepEmpresa').forEach(function(el) {
+                            el.readOnly = false;
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Erro na consulta à API Gov.br:', error);
+                        console.log('Falha na API Gov.br, usando abordagem alternativa (ReceitaWS)');
+                        
+                        // Fallback para ReceitaWS em nova aba
+                        const receitaUrl = `https://www.receitaws.com.br/v1/cnpj/${cnpj}/days/20`;
+                        console.log('URL ReceitaWS fallback:', receitaUrl);
+                        
+                        const newWindow = window.open(receitaUrl, '_blank');
+                        console.log('Nova janela aberta:', !!newWindow);
+                        
+                        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                            console.warn('Abertura de nova janela foi bloqueada pelo navegador - pop-up blocker ativo');
+                            alert('A consulta de CNPJ tenta abrir uma nova aba, mas parece que foi bloqueada pelo navegador. Por favor, permita pop-ups para este site ou preencha os dados manualmente.');
+                        } else {
+                            console.log('Nova janela aberta com sucesso');
+                            alert('Uma janela foi aberta com os dados do CNPJ. Por favor, copie os dados necessários de lá para este formulário.');
+                        }
+                        
+                        // Restaurar botão e tornar campos editáveis
+                        consultarButton.disabled = false;
+                        consultarButton.textContent = 'Consultar CNPJ';
+                        clearTimeout(timeoutId);
+                        
+                        document.querySelectorAll('#razaoSocial, #nomeFantasia, #logradouroEmpresa, #numeroEmpresa, #complementoEmpresa, #bairroEmpresa, #cidadeEmpresa, #estadoEmpresa, #cepEmpresa').forEach(function(el) {
+                            el.readOnly = false;
+                            el.value = '';
+                        });
+                    });
                 } catch (error) {
-                    console.error('Erro ao abrir nova janela:', error);
-                    alert('Houve um problema ao abrir a consulta de CNPJ. Por favor, preencha os dados manualmente.');
-                } finally {
-                    // Restaurar o botão, pois redirecionamos o usuário para consultar externamente
-                    console.log('Restaurando estado do botão');
+                    console.error('Erro geral ao processar consulta:', error);
+                    alert('Houve um problema ao consultar o CNPJ. Por favor, preencha os dados manualmente.');
+                    
+                    // Garantir que os campos estão editáveis
                     consultarButton.disabled = false;
                     consultarButton.textContent = 'Consultar CNPJ';
-                    
-                    // Limpar o timeout já que restauramos o botão imediatamente
-                    console.log('Limpando timeout');
                     clearTimeout(timeoutId);
                     
-                    // Deixar os campos editáveis para preenchimento manual após consulta externa
-                    console.log('Tornando campos editáveis');
                     document.querySelectorAll('#razaoSocial, #nomeFantasia, #logradouroEmpresa, #numeroEmpresa, #complementoEmpresa, #bairroEmpresa, #cidadeEmpresa, #estadoEmpresa, #cepEmpresa').forEach(function(el) {
                         el.readOnly = false;
                     });
