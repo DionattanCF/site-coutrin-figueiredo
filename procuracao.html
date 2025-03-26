@@ -6,6 +6,7 @@
     <title>Procuração Coutrin & Figueiredo Advogados Associados</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary-color: #003366;
@@ -689,7 +690,57 @@
 
             <!-- Etapa 4: Documentos -->
             <div class="step-content" data-step="4">
-                <!-- Conteúdo da etapa 4 -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Documentos</h2>
+                    <div class="document-info">
+                        <p>Os documentos abaixo não são obrigatórios para o preenchimento do formulário, mas devem ser enviados junto com a procuração para validação.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>RG (frente e verso)</label>
+                        <div class="file-upload" data-doc="rg">
+                            <i class="fas fa-file-upload"></i>
+                            <p>Clique para anexar o RG</p>
+                            <input type="file" accept="image/*,.pdf" multiple>
+                        </div>
+                        <div class="file-list"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>CPF</label>
+                        <div class="file-upload" data-doc="cpf">
+                            <i class="fas fa-file-upload"></i>
+                            <p>Clique para anexar o CPF</p>
+                            <input type="file" accept="image/*,.pdf">
+                        </div>
+                        <div class="file-list"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Comprovante de Endereço</label>
+                        <div class="file-upload" data-doc="endereco">
+                            <i class="fas fa-file-upload"></i>
+                            <p>Clique para anexar o comprovante de endereço</p>
+                            <input type="file" accept="image/*,.pdf">
+                        </div>
+                        <div class="file-list"></div>
+                    </div>
+
+                    <div class="form-group" id="documentoEmpresa">
+                        <label>Ata da Empresa / Documentos da Coligação</label>
+                        <div class="file-upload" data-doc="docs-adicionais">
+                            <i class="fas fa-file-upload"></i>
+                            <p>Clique para anexar documentos adicionais</p>
+                            <input type="file" accept="image/*,.pdf" multiple>
+                        </div>
+                        <div class="file-list"></div>
+                    </div>
+                </div>
+
+                <div class="navigation-buttons">
+                    <button type="button" class="btn btn-secondary" id="prevStep4">Anterior</button>
+                    <button type="button" class="btn btn-primary" id="showSubmitBtn">Finalizar</button>
+                </div>
             </div>
 
             <div class="required-note">* Campos obrigatórios</div>
@@ -1026,10 +1077,32 @@
                 
                 try {
                     const formData = new FormData(this);
-                    const data = Object.fromEntries(formData.entries());
-                    data.timestamp = new Date().toISOString();
                     
-                    const response = await fetch('https://webhook.site/your-webhook-url', {
+                    // Adiciona os arquivos ao FormData
+                    $('.file-upload input[type="file"]').each(function() {
+                        const docType = $(this).closest('.file-upload').data('doc');
+                        const files = this.files;
+                        for (let i = 0; i < files.length; i++) {
+                            formData.append(`file_${docType}[]`, files[i]);
+                        }
+                    });
+                    
+                    formData.append('timestamp', new Date().toISOString());
+                    
+                    // Para envio usando JSON, precisamos converter FormData para objeto
+                    const data = {};
+                    formData.forEach((value, key) => {
+                        // Ignora arquivos para a versão JSON
+                        if (!key.startsWith('file_')) {
+                            data[key] = value;
+                        }
+                    });
+                    
+                    // URL do Worker do Cloudflare (após implantação)
+                    const workerUrl = 'https://formulario-procuracao-worker.seu-dominio.workers.dev';
+                    
+                    // Para o banco D1, enviamos apenas os dados JSON (sem arquivos)
+                    const responseD1 = await fetch(workerUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1037,12 +1110,46 @@
                         body: JSON.stringify(data)
                     });
                     
-                    if (!response.ok) {
-                        throw new Error('Erro ao enviar formulário');
+                    const resultD1 = await responseD1.json();
+                    
+                    if (!responseD1.ok || !resultD1.success) {
+                        throw new Error(resultD1.error || 'Erro ao salvar dados no banco');
                     }
                     
+                    // Para o webhook, enviamos o FormData completo com arquivos
+                    const webhookUrl = 'https://flow.elegis.com.br/webhook-test/9f9f8057-0c33-4008-90eb-4dcd8e83464c';
+                    
+                    // Se o webhook aceitar FormData com arquivos:
+                    await fetch(webhookUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    // Se o webhook só aceitar JSON (sem arquivos):
+                    // await fetch(webhookUrl, {
+                    //     method: 'POST',
+                    //     headers: { 'Content-Type': 'application/json' },
+                    //     body: JSON.stringify(data)
+                    // });
+                    
                     alert('Formulário enviado com sucesso!');
+                    
+                    // Resetar formulário
                     this.reset();
+                    
+                    // Limpar listas de arquivos
+                    $('.file-list').empty();
+                    
+                    // Esconder botão de envio
+                    $('#submitButton').addClass('hidden');
+                    $('#showSubmitBtn').removeClass('hidden');
+                    
+                    // Voltar para a primeira etapa
+                    $('.step-content').removeClass('active');
+                    $('.step-content[data-step="1"]').addClass('active');
+                    
+                    $('.step').removeClass('active').removeClass('completed');
+                    $('.step[data-step="1"]').addClass('active');
                     
                 } catch (error) {
                     console.error('Erro:', error);
@@ -1050,6 +1157,56 @@
                 } finally {
                     submitButton.prop('disabled', false).removeClass('loading');
                 }
+            });
+
+            $('#nextStep3').click(function() {
+                // Mostrar ou esconder documentos específicos baseado no tipo de procuração
+                const tipoProcuracao = $('#tipoProcuracao').val();
+                if (tipoProcuracao === 'pessoa_juridica' || tipoProcuracao === 'coligacao') {
+                    $('#documentoEmpresa').show();
+                } else {
+                    $('#documentoEmpresa').hide();
+                }
+                
+                nextStep(3);
+            });
+            
+            $('#prevStep4').click(function() {
+                prevStep(4);
+            });
+            
+            $('#showSubmitBtn').click(function() {
+                $('#submitButton').removeClass('hidden');
+                $(this).addClass('hidden');
+            });
+
+            // Controle de arquivos
+            $('.file-upload').click(function() {
+                $(this).find('input[type="file"]').click();
+            });
+
+            $('.file-upload input[type="file"]').change(function() {
+                const fileList = $(this).closest('.form-group').find('.file-list');
+                const files = this.files;
+                
+                fileList.empty();
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileItem = $('<div class="file-item">')
+                        .append($('<span class="file-name">').text(file.name))
+                        .append($('<span class="remove-file">').html('&times;'));
+                    
+                    fileList.append(fileItem);
+                }
+            });
+
+            $(document).on('click', '.remove-file', function() {
+                const fileList = $(this).closest('.file-list');
+                const fileUpload = fileList.closest('.form-group').find('.file-upload input[type="file"]');
+                
+                fileList.empty();
+                fileUpload.val('');
             });
         });
     </script>
