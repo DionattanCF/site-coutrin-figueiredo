@@ -1185,28 +1185,46 @@
                 this.disabled = true;
                 this.textContent = 'Consultando...';
                 
-                // Consulta da API
-                fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`)
+                // Tentar diretamente com ReceitaWS (mais confiável)
+                consultarCNPJReceitaWS(cnpj, this);
+            });
+
+            // Nova implementação da consulta de CNPJ usando ReceitaWS como principal
+            function consultarCNPJReceitaWS(cnpj, button) {
+                // Usando CloudFlare como proxy para evitar problemas de CORS
+                const corsProxy = 'https://api.allorigins.win/raw?url=';
+                const apiUrl = encodeURIComponent(`https://www.receitaws.com.br/v1/cnpj/${cnpj}`);
+                
+                console.log('Consultando CNPJ (ReceitaWS):', cnpj);
+                
+                fetch(corsProxy + apiUrl)
                     .then(response => {
+                        console.log('Status ReceitaWS:', response.status);
                         if (!response.ok) {
-                            throw new Error('Erro ao consultar CNPJ');
+                            throw new Error(`Erro na API: ${response.status}`);
                         }
                         return response.json();
                     })
                     .then(data => {
-                        // Preencher os campos com os dados da empresa
-                        document.getElementById('razaoSocial').value = data.razao_social || '';
-                        document.getElementById('nomeFantasia').value = data.nome_fantasia || data.razao_social || '';
+                        console.log('Dados ReceitaWS:', data);
+                        
+                        if (data.status === 'ERROR') {
+                            throw new Error(data.message || 'Erro na consulta');
+                        }
+                        
+                        // Preencher campos com formato do ReceitaWS
+                        document.getElementById('razaoSocial').value = data.nome || '';
+                        document.getElementById('nomeFantasia').value = data.fantasia || data.nome || '';
                         document.getElementById('logradouroEmpresa').value = data.logradouro || '';
                         document.getElementById('numeroEmpresa').value = data.numero || '';
                         document.getElementById('complementoEmpresa').value = data.complemento || '';
                         document.getElementById('bairroEmpresa').value = data.bairro || '';
                         document.getElementById('cidadeEmpresa').value = data.municipio || '';
                         document.getElementById('estadoEmpresa').value = data.uf || '';
-                        document.getElementById('cepEmpresa').value = data.cep || '';
+                        document.getElementById('cepEmpresa').value = data.cep ? data.cep.replace(/\D/g, '') : '';
                         
                         // Campos que não vêm da API
-                        document.getElementById('emailEmpresa').value = '';
+                        document.getElementById('emailEmpresa').value = data.email || '';
                         document.getElementById('emailEmpresa').readOnly = false;
                         document.getElementById('cargoEmpresa').value = '';
                         document.getElementById('cargoEmpresa').readOnly = false;
@@ -1218,15 +1236,68 @@
                         updateRequiredFields();
                     })
                     .catch(error => {
-                        console.error('Erro na consulta:', error);
-                        alert('Erro ao consultar CNPJ. Verifique os dados e tente novamente.');
+                        console.error('Falha na primeira tentativa:', error);
+                        
+                        // Tentar com o segundo serviço CNPJ.ws
+                        tentarCNPJws(cnpj);
                     })
                     .finally(() => {
-                        // Restaurar o botão
-                        this.disabled = false;
-                        this.textContent = 'Consultar CNPJ';
+                        // Restaurar botão
+                        button.disabled = false;
+                        button.textContent = 'Consultar CNPJ';
                     });
-            });
+            }
+
+            // Segunda alternativa usando CNPJ.ws
+            function tentarCNPJws(cnpj) {
+                console.log('Tentando segunda alternativa com CNPJ.ws');
+                
+                // CNPJ.ws não tem limitações de CORS
+                fetch(`https://publica.cnpj.ws/cnpj/${cnpj}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`CNPJ.ws retornou: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Dados CNPJ.ws:', data);
+                        
+                        // Preencher campos com formato do CNPJ.ws
+                        document.getElementById('razaoSocial').value = data.razao_social || '';
+                        document.getElementById('nomeFantasia').value = data.estabelecimento?.nome_fantasia || data.razao_social || '';
+                        
+                        const endereco = data.estabelecimento?.endereco || {};
+                        document.getElementById('logradouroEmpresa').value = endereco.tipo_logradouro + ' ' + endereco.logradouro || '';
+                        document.getElementById('numeroEmpresa').value = endereco.numero || '';
+                        document.getElementById('complementoEmpresa').value = endereco.complemento || '';
+                        document.getElementById('bairroEmpresa').value = endereco.bairro || '';
+                        document.getElementById('cidadeEmpresa').value = endereco.cidade?.nome || '';
+                        document.getElementById('estadoEmpresa').value = endereco.estado?.sigla || '';
+                        document.getElementById('cepEmpresa').value = endereco.cep || '';
+                        
+                        // Campos que não vêm da API
+                        document.getElementById('emailEmpresa').value = '';
+                        document.getElementById('cargoEmpresa').value = '';
+                        
+                        // Mostrar seção de dados da empresa
+                        document.getElementById('dadosEmpresa').classList.remove('hidden');
+                        
+                        // Atualizar campos required
+                        updateRequiredFields();
+                    })
+                    .catch(error => {
+                        console.error('Todas as tentativas falharam:', error);
+                        alert('Não foi possível consultar o CNPJ. Por favor, preencha os dados manualmente.');
+                        
+                        // Mostrar seção para preenchimento manual
+                        document.getElementById('dadosEmpresa').classList.remove('hidden');
+                        document.querySelectorAll('#razaoSocial, #nomeFantasia, #logradouroEmpresa, #numeroEmpresa, #complementoEmpresa, #bairroEmpresa, #cidadeEmpresa, #estadoEmpresa, #cepEmpresa').forEach(function(el) {
+                            el.readOnly = false;
+                            el.value = '';
+                        });
+                    });
+            }
 
             // Botão para tornar campos editáveis
             document.getElementById('editarDadosEmpresa').addEventListener('click', function() {
@@ -1277,11 +1348,173 @@
                     return;
                 }
                 
-                // Aqui você pode implementar o código para enviar o formulário
-                alert('Formulário submetido com sucesso!');
+                // Desabilitar o botão de envio para evitar múltiplos envios
+                const submitButton = document.getElementById('submitButton');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Enviando...';
+                submitButton.classList.add('loading');
                 
-                // Código para o envio real do formulário iria aqui
+                // Criar um objeto FormData para enviar os dados
+                const formData = new FormData(this);
+                
+                // Adicionar arquivos ao FormData
+                addFilesToFormData(formData);
+                
+                // Adicionar origem e timestamp
+                formData.append('origem', 'formulario_site');
+                formData.append('timestamp', new Date().toISOString());
+                
+                // URL do webhook
+                const webhookUrl = 'https://flow.elegis.com.br/webhook-test/9f9f8057-0c33-4008-90eb-4dcd8e83464c';
+                
+                // Enviar os dados via fetch
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erro no servidor: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log('Sucesso:', data);
+                    
+                    // Mostrar página de confirmação
+                    mostrarPaginaConfirmacao();
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    
+                    // Tentar enviar sem os arquivos como fallback
+                    const jsonData = {};
+                    for (const [key, value] of formData.entries()) {
+                        // Ignorar arquivos
+                        if (!(value instanceof File)) {
+                            jsonData[key] = value;
+                        }
+                    }
+                    
+                    // Informação sobre arquivos que deveriam ser enviados
+                    jsonData.arquivos_info = [];
+                    document.querySelectorAll('.file-upload input[type="file"]').forEach(function(fileInput) {
+                        const docType = fileInput.closest('.file-upload').getAttribute('data-doc');
+                        const files = fileInput.files;
+                        
+                        for (let i = 0; i < files.length; i++) {
+                            jsonData.arquivos_info.push({
+                                tipo: docType,
+                                nome: files[i].name,
+                                tamanho: files[i].size
+                            });
+                        }
+                    });
+                    
+                    // Tentar enviar como JSON
+                    return fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(jsonData)
+                    });
+                })
+                .then(response => {
+                    if (response && !response.ok) {
+                        throw new Error('Falha no envio do backup JSON');
+                    }
+                    if (response) {
+                        return response.text();
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        console.log('Sucesso no envio de backup:', data);
+                        mostrarPaginaConfirmacao();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro completo:', error);
+                    alert('Ocorreu um erro ao enviar o formulário. Por favor, tente novamente mais tarde ou entre em contato por WhatsApp.');
+                    
+                    // Reativar o botão
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Enviar Formulário';
+                    submitButton.classList.remove('loading');
+                });
             });
+            
+            // Função para mostrar a página de confirmação
+            function mostrarPaginaConfirmacao() {
+                // Esconder o formulário
+                document.querySelector('#procuracaoForm').style.display = 'none';
+                
+                // Criar e mostrar a página de confirmação
+                const confirmacao = document.createElement('div');
+                confirmacao.className = 'confirmacao-page';
+                confirmacao.innerHTML = `
+                    <h2>Formulário enviado com sucesso!</h2>
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <p>Seus dados foram recebidos com sucesso.</p>
+                    <p>Em breve você receberá a procuração no WhatsApp informado. Após recebê-la, por favor:</p>
+                    <ul>
+                        <li>Verifique se todos os dados estão corretos</li>
+                        <li>Assine o documento conforme seu documento de identidade</li>
+                        <li>Envie uma foto da procuração assinada para nosso WhatsApp</li>
+                    </ul>
+                    <p>Caso precise corrigir algum dado ou tenha qualquer dúvida, entre em contato pelo WhatsApp <strong>(82) 98194-0903</strong>.</p>
+                    <button type="button" class="btn btn-primary" onclick="window.location.reload()">Preencher novo formulário</button>
+                `;
+                
+                // Adicionar estilos para a página de confirmação
+                const style = document.createElement('style');
+                style.textContent = `
+                    .confirmacao-page {
+                        text-align: center;
+                        padding: 30px;
+                        background-color: white;
+                        border-radius: 10px;
+                        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+                    }
+                    .confirmacao-page h2 {
+                        color: var(--primary-color);
+                        margin-bottom: 20px;
+                    }
+                    .success-icon {
+                        font-size: 80px;
+                        color: var(--success-color);
+                        margin: 30px 0;
+                    }
+                    .confirmacao-page p {
+                        font-size: 18px;
+                        margin-bottom: 20px;
+                        line-height: 1.6;
+                    }
+                    .confirmacao-page ul {
+                        text-align: left;
+                        max-width: 500px;
+                        margin: 20px auto;
+                        padding-left: 20px;
+                    }
+                    .confirmacao-page li {
+                        margin-bottom: 10px;
+                        line-height: 1.5;
+                    }
+                    .confirmacao-page button {
+                        margin-top: 30px;
+                    }
+                `;
+                
+                // Adicionar a página de confirmação ao container
+                document.head.appendChild(style);
+                document.querySelector('.container').appendChild(confirmacao);
+                
+                // Scrollar para o topo
+                window.scrollTo(0, 0);
+            }
 
             // Executar verificação inicial de campos required
             updateRequiredFields();
