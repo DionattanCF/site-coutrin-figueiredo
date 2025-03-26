@@ -1170,30 +1170,44 @@
 
             // Consulta de CNPJ
             document.getElementById('consultarCNPJ').addEventListener('click', function() {
+                console.log('=== DIAGNÓSTICO CONSULTA CNPJ ===');
+                console.log('Botão clicado - início do processo');
+                
                 const cnpjInput = document.getElementById('cnpjEmpresa');
+                console.log('Input CNPJ encontrado:', !!cnpjInput);
+                
                 const cnpj = cnpjInput.value.replace(/\D/g, '');
+                console.log('CNPJ formatado:', cnpj);
+                
                 const errorMessage = cnpjInput.parentElement.parentElement.querySelector('.error-message');
+                console.log('Elemento de mensagem de erro encontrado:', !!errorMessage);
                 
                 if (!validarCNPJ(cnpj)) {
+                    console.log('CNPJ inválido - exibindo erro');
                     errorMessage.style.display = 'block';
                     return;
                 }
                 
+                console.log('CNPJ válido - prosseguindo');
                 errorMessage.style.display = 'none';
                 
+                console.log('Mostrando seção dadosEmpresa');
                 // Mostrar seção para preenchimento manual imediatamente para evitar bloqueio da interação
                 document.getElementById('dadosEmpresa').classList.remove('hidden');
                 
                 // Armazenar referência ao botão para referência posterior
                 const consultarButton = this;
+                console.log('Referência ao botão armazenada');
                 
                 // Indicador de carregamento
+                console.log('Desabilitando botão e alterando texto');
                 consultarButton.disabled = true;
                 consultarButton.textContent = 'Consultando...';
                 
                 // Configurar timeout para garantir que o botão seja restaurado se algo der errado
+                console.log('Configurando timeout de segurança');
                 const timeoutId = setTimeout(function() {
-                    console.log('Timeout da consulta, restaurando botão');
+                    console.log('Timeout acionado - restaurando botão');
                     consultarButton.disabled = false;
                     consultarButton.textContent = 'Consultar CNPJ';
                     
@@ -1204,24 +1218,46 @@
                     });
                 }, 15000); // 15 segundos de timeout
                 
-                // Abordagem direta que não depende de JSONP e não é bloqueada por CORS
-                // Usamos consulta direta ao navegador de dados públicos da ReceitaWS
-                window.open(`https://www.receitaws.com.br/v1/cnpj/${cnpj}/days/20`, '_blank');
-                
-                // Mensagem para o usuário
-                alert('Uma janela foi aberta com os dados do CNPJ. Por favor, copie os dados necessários de lá para este formulário.');
-                
-                // Restaurar o botão, pois redirecionamos o usuário para consultar externamente
-                consultarButton.disabled = false;
-                consultarButton.textContent = 'Consultar CNPJ';
-                
-                // Limpar o timeout já que restauramos o botão imediatamente
-                clearTimeout(timeoutId);
-                
-                // Deixar os campos editáveis para preenchimento manual após consulta externa
-                document.querySelectorAll('#razaoSocial, #nomeFantasia, #logradouroEmpresa, #numeroEmpresa, #complementoEmpresa, #bairroEmpresa, #cidadeEmpresa, #estadoEmpresa, #cepEmpresa').forEach(function(el) {
-                    el.readOnly = false;
-                });
+                try {
+                    console.log('Tentando abrir ReceitaWS em nova aba');
+                    // Abordagem direta que não depende de JSONP e não é bloqueada por CORS
+                    // Usamos consulta direta ao navegador de dados públicos da ReceitaWS
+                    const receitaUrl = `https://www.receitaws.com.br/v1/cnpj/${cnpj}/days/20`;
+                    console.log('URL ReceitaWS:', receitaUrl);
+                    
+                    // Verificar se a abertura da nova janela foi bloqueada
+                    const newWindow = window.open(receitaUrl, '_blank');
+                    console.log('Nova janela aberta:', !!newWindow);
+                    
+                    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                        console.warn('Abertura de nova janela foi bloqueada pelo navegador - pop-up blocker ativo');
+                        alert('A consulta de CNPJ tenta abrir uma nova aba, mas parece que foi bloqueada pelo navegador. Por favor, permita pop-ups para este site ou preencha os dados manualmente.');
+                    } else {
+                        console.log('Nova janela aberta com sucesso');
+                        // Mensagem para o usuário
+                        alert('Uma janela foi aberta com os dados do CNPJ. Por favor, copie os dados necessários de lá para este formulário.');
+                    }
+                } catch (error) {
+                    console.error('Erro ao abrir nova janela:', error);
+                    alert('Houve um problema ao abrir a consulta de CNPJ. Por favor, preencha os dados manualmente.');
+                } finally {
+                    // Restaurar o botão, pois redirecionamos o usuário para consultar externamente
+                    console.log('Restaurando estado do botão');
+                    consultarButton.disabled = false;
+                    consultarButton.textContent = 'Consultar CNPJ';
+                    
+                    // Limpar o timeout já que restauramos o botão imediatamente
+                    console.log('Limpando timeout');
+                    clearTimeout(timeoutId);
+                    
+                    // Deixar os campos editáveis para preenchimento manual após consulta externa
+                    console.log('Tornando campos editáveis');
+                    document.querySelectorAll('#razaoSocial, #nomeFantasia, #logradouroEmpresa, #numeroEmpresa, #complementoEmpresa, #bairroEmpresa, #cidadeEmpresa, #estadoEmpresa, #cepEmpresa').forEach(function(el) {
+                        el.readOnly = false;
+                    });
+                    
+                    console.log('=== FIM DO DIAGNÓSTICO ===');
+                }
             });
 
             // Botão para tornar campos editáveis
