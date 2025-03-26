@@ -705,10 +705,28 @@
                     $('.step-content[data-step="3"]').addClass('active');
                     
                     $('.step[data-step="1"]').removeClass('active').addClass('completed');
+                    $('.step[data-step="2"]').addClass('completed');
                     $('.step[data-step="3"]').addClass('active');
                 } else {
                     // Para outras opções, vai para Dados Específicos (etapa 2)
-                    nextStep(1);
+                    // e mostra a seção correspondente
+                    $('.step-content[data-step="1"]').removeClass('active');
+                    $('.step-content[data-step="2"]').addClass('active');
+                    
+                    $('.step[data-step="1"]').removeClass('active').addClass('completed');
+                    $('.step[data-step="2"]').addClass('active');
+
+                    // Esconde todas as seções específicas
+                    $('#partidoSection, #pessoaJuridicaSection, #coligacaoSection').addClass('hidden');
+                    
+                    // Mostra a seção específica correspondente
+                    if (tipoProcuracao === 'partido') {
+                        $('#partidoSection').removeClass('hidden');
+                    } else if (tipoProcuracao === 'pessoa_juridica') {
+                        $('#pessoaJuridicaSection').removeClass('hidden');
+                    } else if (tipoProcuracao === 'coligacao') {
+                        $('#coligacaoSection').removeClass('hidden');
+                    }
                 }
             });
 
@@ -853,15 +871,6 @@
                 const selectedValue = $(this).val();
                 const errorMessage = $(this).next('.error-message');
                 
-                // Esconde todas as seções
-                $('#partidoSection, #pessoaJuridicaSection, #coligacaoSection').addClass('hidden');
-                
-                // Mostra a seção selecionada
-                if (selectedValue && selectedValue !== 'pessoa_fisica') {
-                    $(`#${selectedValue}Section`).removeClass('hidden');
-                }
-                
-                // Esconde mensagem de erro se uma opção for selecionada
                 if (selectedValue) {
                     errorMessage.hide();
                 }
