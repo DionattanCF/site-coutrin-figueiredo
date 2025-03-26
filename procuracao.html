@@ -473,8 +473,8 @@
                 <div id="partidoSection" class="form-section hidden">
                     <h2 class="form-section-title">Dados do Partido</h2>
                     <div class="form-group">
-                        <label class="required">2 - Qual o nome do Partido, Comissão Provisória ou Diretório</label>
-                        <input type="text" name="nomePartido" required>
+                        <label>2 - Qual o nome do Partido, Comissão Provisória ou Diretório</label>
+                        <input type="text" name="nomePartido">
                     </div>
                 </div>
                 <div id="pessoaJuridicaSection" class="form-section hidden">
@@ -544,16 +544,16 @@
                 <div id="coligacaoSection" class="form-section hidden">
                     <h2 class="form-section-title">Dados da Coligação</h2>
                     <div class="form-group">
-                        <label class="required">18 - Qual o nome da Coligação</label>
-                        <input type="text" name="nomeColigacao" required>
+                        <label>18 - Qual o nome da Coligação</label>
+                        <input type="text" name="nomeColigacao">
                     </div>
                     <div class="form-group">
-                        <label class="required">20 - Informe seu email</label>
-                        <input type="email" name="emailColigacao" required>
+                        <label>20 - Informe seu email</label>
+                        <input type="email" name="emailColigacao">
                     </div>
                     <div class="form-group">
-                        <label class="required">21 - Qual o endereço da coligação?</label>
-                        <textarea name="enderecoColigacao" required></textarea>
+                        <label>21 - Qual o endereço da coligação?</label>
+                        <textarea name="enderecoColigacao"></textarea>
                     </div>
                 </div>
                 <div class="navigation-buttons">
@@ -1083,20 +1083,20 @@
                         const docType = $(this).closest('.file-upload').data('doc');
                         const files = this.files;
                         for (let i = 0; i < files.length; i++) {
-                            formData.append(`file_${docType}[]`, files[i]);
+                            formData.append(`file_${docType}_${i}`, files[i]);
                         }
                     });
                     
                     formData.append('timestamp', new Date().toISOString());
                     
                     // Para envio usando JSON, precisamos converter FormData para objeto
-                    const data = {};
-                    formData.forEach((value, key) => {
+                    const jsonData = {};
+                    for (const [key, value] of formData.entries()) {
                         // Ignora arquivos para a versão JSON
                         if (!key.startsWith('file_')) {
-                            data[key] = value;
+                            jsonData[key] = value;
                         }
-                    });
+                    }
                     
                     // URL do Worker do Cloudflare (após implantação)
                     const workerUrl = 'https://formulario-procuracao-worker.seu-dominio.workers.dev';
@@ -1107,7 +1107,7 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(data)
+                        body: JSON.stringify(jsonData)
                     });
                     
                     const resultD1 = await responseD1.json();
@@ -1124,13 +1124,6 @@
                         method: 'POST',
                         body: formData
                     });
-                    
-                    // Se o webhook só aceitar JSON (sem arquivos):
-                    // await fetch(webhookUrl, {
-                    //     method: 'POST',
-                    //     headers: { 'Content-Type': 'application/json' },
-                    //     body: JSON.stringify(data)
-                    // });
                     
                     alert('Formulário enviado com sucesso!');
                     
