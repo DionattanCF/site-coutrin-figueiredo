@@ -516,7 +516,15 @@
                         <textarea name="enderecoColigacao" required></textarea>
                     </div>
                 </div>
-                <div id="dadosPessoaisSection" class="form-section hidden">
+                <div class="navigation-buttons">
+                    <button type="button" class="btn btn-primary" id="nextStep2">Próximo</button>
+                    <button type="button" class="btn btn-secondary" id="prevStep2">Anterior</button>
+                </div>
+            </div>
+
+            <!-- Etapa 3: Dados Pessoais -->
+            <div class="step-content" data-step="3">
+                <div id="dadosPessoaisSection" class="form-section">
                     <h2 class="form-section-title">Dados Pessoais</h2>
                     <div class="form-group">
                         <label class="required">7 - Nome Completo</label>
@@ -635,14 +643,9 @@
                     </div>
                 </div>
                 <div class="navigation-buttons">
-                    <button type="button" class="btn btn-primary" id="nextStep2">Próximo</button>
-                    <button type="button" class="btn btn-secondary" id="prevStep2">Anterior</button>
+                    <button type="button" class="btn btn-primary" id="nextStep3">Próximo</button>
+                    <button type="button" class="btn btn-secondary" id="prevStep3">Anterior</button>
                 </div>
-            </div>
-
-            <!-- Etapa 3: Dados Pessoais -->
-            <div class="step-content" data-step="3">
-                <!-- Conteúdo da etapa 3 -->
             </div>
 
             <!-- Etapa 4: Documentos -->
@@ -695,7 +698,18 @@
                 }
                 
                 errorMessage.hide();
-                nextStep(1);
+                
+                if (tipoProcuracao === 'pessoa_fisica') {
+                    // Se for Pessoa Física, vai direto para Dados Pessoais (etapa 3)
+                    $('.step-content[data-step="1"]').removeClass('active');
+                    $('.step-content[data-step="3"]').addClass('active');
+                    
+                    $('.step[data-step="1"]').removeClass('active').addClass('completed');
+                    $('.step[data-step="3"]').addClass('active');
+                } else {
+                    // Para outras opções, vai para Dados Específicos (etapa 2)
+                    nextStep(1);
+                }
             });
 
             $('#nextStep2').click(function() {
@@ -704,6 +718,21 @@
 
             $('#prevStep2').click(function() {
                 prevStep(2);
+            });
+
+            $('#prevStep3').click(function() {
+                const tipoProcuracao = $('#tipoProcuracao').val();
+                if (tipoProcuracao === 'pessoa_fisica') {
+                    // Se for Pessoa Física, volta para a primeira etapa
+                    $('.step-content[data-step="3"]').removeClass('active');
+                    $('.step-content[data-step="1"]').addClass('active');
+                    
+                    $('.step[data-step="3"]').removeClass('active');
+                    $('.step[data-step="1"]').addClass('active').removeClass('completed');
+                } else {
+                    // Para outras opções, volta para Dados Específicos
+                    prevStep(3);
+                }
             });
 
             // Validação de CPF
