@@ -1401,14 +1401,13 @@
                 console.log('Metadados adicionados ao FormData');
                 
                 // URL do webhook
-                const webhookUrl = 'https://procuracao-forms-database.workers.dev/webhook-test/9f9f8057-0c33-4008-90eb-4dcd8e83464c';
+                const webhookUrl = 'https://flow.elegis.com.br/webhook-test/9f9f8057-0c33-4008-90eb-4dcd8e83464c';
                 console.log('URL do webhook:', webhookUrl);
                 
                 // Adicionar credenciais para permitir cookies de autenticação (pode ajudar com CORS)
                 const fetchOptions = {
                     method: 'POST',
                     body: formData,
-                    credentials: 'include',
                     mode: 'cors'
                 };
                 console.log('Opções de fetch configuradas:', JSON.stringify(fetchOptions, (k, v) => k === 'body' ? '[FormData]' : v));
@@ -1634,7 +1633,7 @@
                         <li>Assine o documento conforme seu documento de identidade</li>
                         <li>Envie uma foto da procuração assinada para nosso WhatsApp</li>
                     </ul>
-                    <p>Caso precise corrigir algum dado ou tenha qualquer dúvida, entre em contato pelo WhatsApp <strong>(92) 98340-4044</strong>.</p>
+                    <p>Caso precise corrigir algum dado ou tenha qualquer dúvida, entre em contato pelo WhatsApp <strong>(64) 98408-5001</strong>.</p>
                     <button type="button" class="btn btn-primary" onclick="window.location.reload()">Preencher novo formulário</button>
                 `;
                 
