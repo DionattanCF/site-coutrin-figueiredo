@@ -398,14 +398,14 @@
                 comentarios_adicionais: document.getElementById('comentarios_adicionais').value
             };
 
-            // Adicionar headers CORS e tratamento de erros melhorado
-            fetch('https://dionattan.adv.br/submit-form', {
+            // Modificar o endpoint para usar a rota local
+            fetch('http://localhost:5000/submit-form', {  // Alterado o endpoint
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                credentials: 'include', // para cookies, se necessário
+                credentials: 'omit',  // Alterado para 'omit' em vez de 'include'
                 body: JSON.stringify(formData)
             })
             .then(response => {
