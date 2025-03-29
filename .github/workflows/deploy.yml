@@ -1,0 +1,26 @@
+name: Deploy to Droplet
+
+on:
+  push:
+    branches:
+      - main  # Altere para 'master' se for o seu branch principal
+
+jobs:
+  deploy:
+    name: Deploy to dionattan.adv.br
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+
+      - name: Configurar chave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 152.42.154.200 >> ~/.ssh/known_hosts
+
+      - name: Enviar arquivos para o servidor
+        run: |
+          rsync -avz --delete ./ root@152.42.154.200:/var/www/dionattan.adv.br/
