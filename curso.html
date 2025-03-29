@@ -398,26 +398,30 @@
                 comentarios_adicionais: document.getElementById('comentarios_adicionais').value
             };
 
-            // Enviar dados para o servidor
-            fetch('/submit-form', {
+            // Adicionar headers CORS e tratamento de erros melhorado
+            fetch('https://dionattan.adv.br/submit-form', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
+                credentials: 'include', // para cookies, se necessário
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert('Formulário enviado com sucesso! Obrigado pela sua participação.');
-                    this.reset();
-                } else {
-                    alert('Erro ao enviar formulário: ' + data.message);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Sucesso:', data);
+                alert('Formulário enviado com sucesso! Obrigado pela sua participação.');
+                this.reset();
             })
             .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro ao enviar formulário. Por favor, tente novamente.');
+                console.error('Erro ao enviar formulário:', error);
+                alert('Erro ao enviar formulário. Por favor, tente novamente mais tarde.');
             });
         });
     </script>
