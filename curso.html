@@ -398,14 +398,13 @@
                 comentarios_adicionais: document.getElementById('comentarios_adicionais').value
             };
 
-            // Modificar o endpoint para usar a rota local
-            fetch('http://localhost:5000/submit-form', {  // Alterado o endpoint
+            // Atualizar para usar o mesmo domínio do formulário
+            fetch('https://dionattan.adv.br/submit-form', {  // Alterado para usar HTTPS e o domínio correto
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                credentials: 'omit',  // Alterado para 'omit' em vez de 'include'
                 body: JSON.stringify(formData)
             })
             .then(response => {
