@@ -17,10 +17,11 @@ jobs:
       - name: Configurar chave SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/deploy_github
+          chmod 600 ~/.ssh/deploy_github
           ssh-keyscan -H 152.42.154.200 >> ~/.ssh/known_hosts
+
 
       - name: Enviar arquivos para o servidor
         run: |
-          rsync -avz --delete ./ root@152.42.154.200:/var/www/dionattan.adv.br/
+          rsync -avz --delete -e "ssh -i ~/.ssh/deploy_github" ./ root@152.42.154.200:/var/www/dionattan.adv.br/
