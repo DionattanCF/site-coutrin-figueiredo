@@ -377,8 +377,48 @@
     <script>
         document.getElementById('diagnosticoForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Formulário enviado com sucesso! Obrigado pela sua participação.');
-            // Aqui você pode adicionar código para processar o envio do formulário
+            
+            // Coletar todos os dados do formulário
+            const formData = {
+                expectativa: document.getElementById('expectativa').value,
+                uso_ia: document.querySelector('input[name="uso_ia"]:checked')?.value,
+                ferramentas_ia: document.getElementById('ferramentas_ia').value,
+                desafios: Array.from(document.querySelectorAll('input[name="desafios"]:checked')).map(cb => cb.value),
+                desafio_outro_texto: document.getElementById('desafio_outro_texto').value,
+                tarefas_ia_util: document.getElementById('tarefas_ia_util').value,
+                pareceres_ia: document.getElementById('pareceres_ia').value,
+                revisoes_ia: document.getElementById('revisoes_ia').value,
+                rotinas_repetitivas: document.getElementById('rotinas_repetitivas').value,
+                tarefas_automatizar: document.getElementById('tarefas_automatizar').value,
+                oportunidades_ia: document.getElementById('oportunidades_ia').value,
+                familiaridade_tech: document.querySelector('input[name="familiaridade_tech"]:checked')?.value,
+                abordagem_curso: document.querySelector('input[name="abordagem_curso"]:checked')?.value,
+                formato_curso: Array.from(document.querySelectorAll('input[name="formato_curso"]:checked')).map(cb => cb.value),
+                temas_especificos: document.getElementById('temas_especificos').value,
+                comentarios_adicionais: document.getElementById('comentarios_adicionais').value
+            };
+
+            // Enviar dados para o servidor
+            fetch('/submit-form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Formulário enviado com sucesso! Obrigado pela sua participação.');
+                    this.reset();
+                } else {
+                    alert('Erro ao enviar formulário: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao enviar formulário. Por favor, tente novamente.');
+            });
         });
     </script>
 </body>
