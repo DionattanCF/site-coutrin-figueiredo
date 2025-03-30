@@ -1,4 +1,3 @@
-v1
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -421,7 +420,39 @@ v1
                 },
                 body: JSON.stringify({
                     timestamp: new Date().toISOString(),
-                    formData: formData
+                    // Dados pessoais e expectativas
+                    expectativa_curso: formData.expectativa,
+                    uso_ia: formData.uso_ia,
+                    ferramentas_ia: formData.ferramentas_ia,
+                    
+                    // Desafios (separados em campos individuais)
+                    desafio_volume: formData.desafios.includes('Volume de demandas legislativas e jurídicas') ? 'Sim' : 'Não',
+                    desafio_pareceres: formData.desafios.includes('Elaboração de pareceres jurídicos complexos') ? 'Sim' : 'Não',
+                    desafio_pesquisa: formData.desafios.includes('Pesquisas jurídicas e jurisprudenciais demoradas') ? 'Sim' : 'Não',
+                    desafio_minutas: formData.desafios.includes('Produção e revisão de minutas de projetos de lei') ? 'Sim' : 'Não',
+                    desafio_prazos: formData.desafios.includes('Controle de prazos e tarefas múltiplas') ? 'Sim' : 'Não',
+                    desafio_alteracoes: formData.desafios.includes('Acompanhamento de alterações legislativas') ? 'Sim' : 'Não',
+                    desafio_comunicacao: formData.desafios.includes('Comunicação com outros setores e parlamentares') ? 'Sim' : 'Não',
+                    desafio_outro: formData.desafios.includes('Outro') ? formData.desafio_outro_texto : '',
+                    
+                    // Tarefas e otimizações
+                    tarefas_ia_util: formData.tarefas_ia_util,
+                    pareceres_ia: formData.pareceres_ia,
+                    revisoes_ia: formData.revisoes_ia,
+                    
+                    // Rotinas
+                    rotinas_repetitivas: formData.rotinas_repetitivas,
+                    tarefas_automatizar: formData.tarefas_automatizar,
+                    oportunidades_ia: formData.oportunidades_ia,
+                    
+                    // Formação e formato
+                    familiaridade_tech: formData.familiaridade_tech,
+                    abordagem_curso: formData.abordagem_curso,
+                    formato_curso: formData.formato_curso.join('; '),
+                    
+                    // Contribuições finais
+                    temas_especificos: formData.temas_especificos,
+                    comentarios_adicionais: formData.comentarios_adicionais
                 })
             })
             .then(response => {
