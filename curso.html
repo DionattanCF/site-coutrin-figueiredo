@@ -411,36 +411,16 @@
             });
             localStorage.setItem('formRespostas', JSON.stringify(savedResponses));
             
-            // Enviar os dados para o Cloudflare Worker
-            fetch('/submit', {
+            // Enviar dados para o webhook da Elegis
+            fetch('https://flow.elegis.com.br/webhook-test/9f9f8057-0c33-4008-90eb-4dcd8e83464c', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Enviar dados para o webhook da Elegis
-                    return fetch('https://flow.elegis.com.br/webhook-test/9f9f8057-0c33-4008-90eb-4dcd8e83464c', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            timestamp: new Date().toISOString(),
-                            formData: formData
-                        })
-                    });
-                } else {
-                    throw new Error(data.error || 'Erro desconhecido');
-                }
+                body: JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    formData: formData
+                })
             })
             .then(response => {
                 if (!response.ok) {
