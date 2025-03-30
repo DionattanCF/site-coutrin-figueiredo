@@ -414,6 +414,7 @@
             // Enviar dados para o webhook da Elegis
             fetch('https://flow.elegis.com.br/webhook-test/9f9f8057-0c33-4008-90eb-4dcd8e83464c', {
                 method: 'POST',
+                mode: 'no-cors',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -423,9 +424,6 @@
                 })
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP no webhook: ${response.status}`);
-                }
                 alert('Formulário enviado com sucesso! Obrigado pela sua participação.');
                 this.reset();
             })
