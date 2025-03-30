@@ -378,6 +378,11 @@
         document.getElementById('diagnosticoForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Desabilitar o botão para evitar envios duplicados
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+            
             // Coletar todos os dados do formulário
             const formData = {
                 expectativa: document.getElementById('expectativa').value,
@@ -398,29 +403,60 @@
                 comentarios_adicionais: document.getElementById('comentarios_adicionais').value
             };
 
-            // Atualizar para usar o mesmo domínio do formulário
-            fetch('https://dionattan.adv.br/submit-form', {  // Alterado para usar HTTPS e o domínio correto
+            // Manter a funcionalidade de armazenamento local como backup
+            const savedResponses = JSON.parse(localStorage.getItem('formRespostas') || '[]');
+            savedResponses.push({
+                data: new Date().toISOString(),
+                respostas: formData
+            });
+            localStorage.setItem('formRespostas', JSON.stringify(savedResponses));
+            
+            // Enviar os dados para o Cloudflare Worker
+            fetch('/submit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
                 },
                 body: JSON.stringify(formData)
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`Erro HTTP: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Sucesso:', data);
+                if (data.success) {
+                    // Enviar dados para o webhook da Elegis
+                    return fetch('https://flow.elegis.com.br/webhook-test/9f9f8057-0c33-4008-90eb-4dcd8e83464c', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            timestamp: new Date().toISOString(),
+                            formData: formData
+                        })
+                    });
+                } else {
+                    throw new Error(data.error || 'Erro desconhecido');
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP no webhook: ${response.status}`);
+                }
                 alert('Formulário enviado com sucesso! Obrigado pela sua participação.');
                 this.reset();
             })
             .catch(error => {
-                console.error('Erro ao enviar formulário:', error);
-                alert('Erro ao enviar formulário. Por favor, tente novamente mais tarde.');
+                console.error('Erro ao enviar dados:', error);
+                alert('Ocorreu um erro ao enviar os dados. Suas respostas foram salvas localmente como backup.');
+            })
+            .finally(() => {
+                // Reabilitar o botão
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar Diagnóstico';
             });
         });
     </script>
