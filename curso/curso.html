@@ -1,4 +1,4 @@
-v1
+v2
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -180,7 +180,7 @@ v1
 <body>
     <div class="container">
         <header>
-            <h1>🧠 Formulário Diagnóstico </h1>
+            <h1>🧠 Formulário Diagnóstico</h1>
             <h2>Curso: Uso Avançado de Inteligência Artificial na Prática Jurídica</h2>
         </header>
 
@@ -413,48 +413,35 @@ v1
             localStorage.setItem('formRespostas', JSON.stringify(savedResponses));
             
             // Enviar dados para o webhook da Elegis
+            const formDataToSend = new FormData();
+            formDataToSend.append('timestamp', new Date().toISOString());
+            formDataToSend.append('expectativa_curso', formData.expectativa);
+            formDataToSend.append('uso_ia', formData.uso_ia);
+            formDataToSend.append('ferramentas_ia', formData.ferramentas_ia);
+            formDataToSend.append('desafio_volume', formData.desafios.includes('Volume de demandas legislativas e jurídicas') ? 'Sim' : 'Não');
+            formDataToSend.append('desafio_pareceres', formData.desafios.includes('Elaboração de pareceres jurídicos complexos') ? 'Sim' : 'Não');
+            formDataToSend.append('desafio_pesquisa', formData.desafios.includes('Pesquisas jurídicas e jurisprudenciais demoradas') ? 'Sim' : 'Não');
+            formDataToSend.append('desafio_minutas', formData.desafios.includes('Produção e revisão de minutas de projetos de lei') ? 'Sim' : 'Não');
+            formDataToSend.append('desafio_prazos', formData.desafios.includes('Controle de prazos e tarefas múltiplas') ? 'Sim' : 'Não');
+            formDataToSend.append('desafio_alteracoes', formData.desafios.includes('Acompanhamento de alterações legislativas') ? 'Sim' : 'Não');
+            formDataToSend.append('desafio_comunicacao', formData.desafios.includes('Comunicação com outros setores e parlamentares') ? 'Sim' : 'Não');
+            formDataToSend.append('desafio_outro', formData.desafios.includes('Outro') ? formData.desafio_outro_texto : '');
+            formDataToSend.append('tarefas_ia_util', formData.tarefas_ia_util);
+            formDataToSend.append('pareceres_ia', formData.pareceres_ia);
+            formDataToSend.append('revisoes_ia', formData.revisoes_ia);
+            formDataToSend.append('rotinas_repetitivas', formData.rotinas_repetitivas);
+            formDataToSend.append('tarefas_automatizar', formData.tarefas_automatizar);
+            formDataToSend.append('oportunidades_ia', formData.oportunidades_ia);
+            formDataToSend.append('familiaridade_tech', formData.familiaridade_tech);
+            formDataToSend.append('abordagem_curso', formData.abordagem_curso);
+            formDataToSend.append('formato_curso', formData.formato_curso.join('; '));
+            formDataToSend.append('temas_especificos', formData.temas_especificos);
+            formDataToSend.append('comentarios_adicionais', formData.comentarios_adicionais);
+
             fetch('https://flow.elegis.com.br/webhook-test/9f9f8057-0c33-4008-90eb-4dcd8e83464c', {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    timestamp: new Date().toISOString(),
-                    // Dados pessoais e expectativas
-                    expectativa_curso: formData.expectativa,
-                    uso_ia: formData.uso_ia,
-                    ferramentas_ia: formData.ferramentas_ia,
-                    
-                    // Desafios (separados em campos individuais)
-                    desafio_volume: formData.desafios.includes('Volume de demandas legislativas e jurídicas') ? 'Sim' : 'Não',
-                    desafio_pareceres: formData.desafios.includes('Elaboração de pareceres jurídicos complexos') ? 'Sim' : 'Não',
-                    desafio_pesquisa: formData.desafios.includes('Pesquisas jurídicas e jurisprudenciais demoradas') ? 'Sim' : 'Não',
-                    desafio_minutas: formData.desafios.includes('Produção e revisão de minutas de projetos de lei') ? 'Sim' : 'Não',
-                    desafio_prazos: formData.desafios.includes('Controle de prazos e tarefas múltiplas') ? 'Sim' : 'Não',
-                    desafio_alteracoes: formData.desafios.includes('Acompanhamento de alterações legislativas') ? 'Sim' : 'Não',
-                    desafio_comunicacao: formData.desafios.includes('Comunicação com outros setores e parlamentares') ? 'Sim' : 'Não',
-                    desafio_outro: formData.desafios.includes('Outro') ? formData.desafio_outro_texto : '',
-                    
-                    // Tarefas e otimizações
-                    tarefas_ia_util: formData.tarefas_ia_util,
-                    pareceres_ia: formData.pareceres_ia,
-                    revisoes_ia: formData.revisoes_ia,
-                    
-                    // Rotinas
-                    rotinas_repetitivas: formData.rotinas_repetitivas,
-                    tarefas_automatizar: formData.tarefas_automatizar,
-                    oportunidades_ia: formData.oportunidades_ia,
-                    
-                    // Formação e formato
-                    familiaridade_tech: formData.familiaridade_tech,
-                    abordagem_curso: formData.abordagem_curso,
-                    formato_curso: formData.formato_curso.join('; '),
-                    
-                    // Contribuições finais
-                    temas_especificos: formData.temas_especificos,
-                    comentarios_adicionais: formData.comentarios_adicionais
-                })
+                body: formDataToSend
             })
             .then(response => {
                 alert('Formulário enviado com sucesso! Obrigado pela sua participação.');
